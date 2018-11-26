@@ -24,7 +24,7 @@ def get_date(value):
         日期 = re.search(r'\d{4}/\d{2}/\d{2}', value).group()
         return 日期
     except AttributeError:
-        pass
+        return '1970/01/01'
 
 
 def remove_comment_tags(类型):
@@ -75,3 +75,11 @@ class JobBoleArticleItem(scrapy.Item):
               self['点赞数'], self['收藏数'], self['评论数'], self['类型列表'],
               self['文章封面图url'][0], self['文章封面图片保存路径'])
         return 插入数据的sql语句, 参数
+
+class ChemicalItem(scrapy.Item):
+    CAS = scrapy.Field()
+    中文名称 = scrapy.Field()
+    英文名称 = scrapy.Field()
+    化学式 = scrapy.Field()
+    化学结构式图片url = scrapy.Field()
+

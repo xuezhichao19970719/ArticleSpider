@@ -69,7 +69,7 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     #'scrapy.pipelines.images.ImagesPipeline': 1,
-    'ArticleSpider.pipelines.ArticleImagePipeline': 1,
+    #'ArticleSpider.pipelines.ArticleImagePipeline': 1,
     #'ArticleSpider.pipelines.JsonExporterPipeline': 2,
     #'ArticleSpider.pipelines.MysqlTwistedPipeline': 3,
 }

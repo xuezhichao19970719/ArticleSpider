@@ -15,6 +15,11 @@ class JobboleSpider(scrapy.Spider):
     allowed_domains = ['blog.jobbole.com']
     start_urls = ['http://blog.jobbole.com/all-posts/']
 
+    handle_httpstatus_list =[404]
+
+    def __init__(self):
+        self.失败url列表 = []
+        dispatcher.connect(self.handle_spider_closed, signals.spider_closed)
     # def __init__(self):
     #     self.浏览器 = webdriver.Chrome(
     #         executable_path='E:\scrapyspider\ArticleSpider\chromedriver.exe')
@@ -25,8 +30,14 @@ class JobboleSpider(scrapy.Spider):
     #     print('爬虫关闭,退出Chrome')
     #     self.浏览器.quit()
 
+    def handle_spider_closed(self, spider, reason):
+        self.crawler.stats.set_value('失败url字符串', ','.join(self.失败url列表))
+
 
     def parse(self, response):
+        if response.status == 404:
+            self.失败url列表.append(response.url)
+            self.crawler.stats.inc_value('失败url个数')
         # 获取文章列表所有文章url
         单个页面所有文章节点 = response.css('.post.floated-thumb .post-thumb a')
         for 文章节点 in 单个页面所有文章节点:

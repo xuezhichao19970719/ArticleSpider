@@ -31,7 +31,8 @@ class JsonExporterPipeline(object):
     # 调用scrapy提供的json exporter导出json
     def __init__(self):
         self.file = open('article_exporter.json', 'wb')
-        self.exporter = JsonItemExporter(self.file, encoding='utf-8', ensure_ascii=False)
+        self.exporter = JsonItemExporter(self.file, encoding='utf-8',
+                                         ensure_ascii=False)
         self.exporter.start_exporting()
 
     def spider_closr(self, spider):
@@ -46,15 +47,21 @@ class JsonExporterPipeline(object):
 class MysqlPipeline(object):
     # 同步操作 io阻塞
     def __init__(self):
-        self.conn = MySQLdb.connect('127.0.0.1', 'root', 'test123456', 'scrapyspider', charset='utf8', use_unicode=True)
+        self.conn = MySQLdb.connect('127.0.0.1', 'root', 'test123456',
+                                    'scrapyspider', charset='utf8',
+                                    use_unicode=True)
         self.cursor = self.conn.cursor()
 
     def process_item(self, item, spider):
         插入数据的sql语句 = '''
-            INSERT INTO jobbole(标题, 创建日期, 文章url, 文章url_md5, 点赞数, 收藏数, 评论数, 类型列表, 文章封面图url, 文章封面图片保存路径)
+            INSERT INTO jobbole(标题, 创建日期, 文章url, 文章url_md5, 点赞数, 收藏数, 评论数, 
+            类型列表, 文章封面图url, 文章封面图片保存路径)
             VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         '''
-        self.cursor.execute(插入数据的sql语句, (item['标题'], item['创建日期'], item['文章url'], item['文章url_md5'], item['点赞数'], item['收藏数'], item['评论数'], item['类型列表'], item['文章封面图url'][0], item['文章封面图片保存路径']))
+        self.cursor.execute(插入数据的sql语句, (
+        item['标题'], item['创建日期'], item['文章url'], item['文章url_md5'],
+        item['点赞数'], item['收藏数'], item['评论数'], item['类型列表'],
+        item['文章封面图url'][0], item['文章封面图片保存路径']))
         self.conn.commit()
 
 
@@ -72,7 +79,7 @@ class MysqlTwistedPipeline(object):
             'password': settings['MYSQL_PASSWORD'],
             'charset': 'utf8',
             'cursorclass': MySQLdb.cursors.DictCursor,
-            'use_unicode': True
+            'use_unicode': True,
         }
         dbpool = adbapi.ConnectionPool('MySQLdb', **dbparms)
         return cls(dbpool)
@@ -86,7 +93,7 @@ class MysqlTwistedPipeline(object):
         print(failure)
 
     def do_insert(self, cursor, item):
-        插入数据的sql语句,参数 = item.get_insert_sql()
+        插入数据的sql语句, 参数 = item.get_insert_sql()
 
         cursor.execute(插入数据的sql语句, 参数)
 
