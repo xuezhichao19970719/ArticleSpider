@@ -8,10 +8,6 @@ class ChemicalbookSpider(CrawlSpider):
     name = 'chemicalbook'
     allowed_domains = ['chemicalbook.com']
     start_urls = ['https://www.chemicalbook.com/ProductIndex.aspx']
-    headers = {
-        "HOST": "www.chemicalbook.com",
-        "Referer": "https://www.chemicalbook.com/ProductIndex.aspx",
-    }
     rules = (
         Rule(LinkExtractor(allow=r'CASDetailList_\d+.htm'), callback='parse_chemica', follow=True),
     )
