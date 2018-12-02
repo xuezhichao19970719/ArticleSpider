@@ -10,7 +10,10 @@ import re
 import datetime
 from w3lib.html import remove_tags
 from scrapy.loader.processors import MapCompose, TakeFirst, Join
+from .models.es_types import ArticleType
+from elasticsearch_dsl.connections import connections
 
+es =connections.create_connection(ArticleType)
 
 def get_nums(value):
     try:
@@ -42,6 +45,26 @@ def handle_jobaddr(value):
     addr_list = value.split("\n")
     addr_list = [item.strip() for item in addr_list if item.strip()!="查看地图"]
     return "".join(addr_list)
+
+def gen_suggests(index, info_tuple):
+    #根据字符串生成搜索建议数组
+    常用词集合去重 = set()
+    建议列表 = []
+    for 文本, 权重 in info_tuple:
+        if 文本:
+            #调用es的analyze接口分析字符串
+            分析结果 = es.indices.analyze(index=index, analyzer="ik_smart", params={'filter':["lowercase"]}, body=文本)
+            分析产生常用词 = set([r["token"] for r in 分析结果["tokens"] if len(r["token"])>1])
+            常用词集合 = 分析产生常用词 - 常用词集合去重
+            常用词集合去重.update(常用词集合)
+        else:
+            常用词集合 = set()
+
+        if 常用词集合:
+            建议列表.append({"input":list(常用词集合), "weight":权重})
+
+    return 建议列表
+
 
 class JobBoleArticleItem(scrapy.Item):
     标题 = scrapy.Field(
@@ -75,6 +98,9 @@ class JobBoleArticleItem(scrapy.Item):
     )
     文章封面图url = scrapy.Field()
     文章封面图片保存路径 = scrapy.Field()
+    文章内容 = scrapy.Field(
+        output_processor=TakeFirst()
+    )
 
     def get_insert_sql(self):
         插入数据的sql语句 = '''
@@ -86,6 +112,25 @@ class JobBoleArticleItem(scrapy.Item):
               self['点赞数'], self['收藏数'], self['评论数'], self['类型列表'],
               self['文章封面图url'][0], self['文章封面图片保存路径'])
         return 插入数据的sql语句, 参数
+
+    def save_to_es(self):
+        文章 = ArticleType()
+        文章.标题 = self['标题']
+        文章.创建日期 = self['创建日期']
+        文章.文章url = self['文章url']
+        文章.点赞数 = self['点赞数']
+        文章.收藏数 = self['收藏数']
+        文章.评论数 = self['评论数']
+        文章.评论数 = self['评论数']
+        文章.类型列表 = self['类型列表']
+        文章.文章内容 = self['文章内容']
+        文章.meta.id = self['文章url_md5']
+        # 在保存数据时必须传入suggest
+        文章.建议 = gen_suggests(ArticleType._doc_type.index, ((文章.标题,10),(文章.类型列表, 7)))
+
+        文章.save()
+
+        return
 
 class ChemicalItem(scrapy.Item):
     CAS = scrapy.Field()

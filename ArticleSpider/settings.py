@@ -72,6 +72,7 @@ ITEM_PIPELINES = {
     #'ArticleSpider.pipelines.ArticleImagePipeline': 1,
     #'ArticleSpider.pipelines.JsonExporterPipeline': 2,
     #'ArticleSpider.pipelines.MysqlTwistedPipeline': 3,
+    'ArticleSpider.pipelines.ElasticsearchPipeline': 4,
 }
 IMAGES_URLS_FIELD = '文章封面图url'
 project_dir = os.path.abspath(os.path.dirname(__file__))

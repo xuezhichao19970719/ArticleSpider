@@ -98,6 +98,15 @@ class MysqlTwistedPipeline(object):
         cursor.execute(插入数据的sql语句, 参数)
 
 
+class ElasticsearchPipeline(object):
+    # 数据写入es
+    def process_item(self, item, spider):
+        # 将item转换成es的数据
+        item.save_to_es()
+
+        return item
+
+
 class ArticleImagePipeline(ImagesPipeline):
     def item_completed(self, results, item, info):
         try:

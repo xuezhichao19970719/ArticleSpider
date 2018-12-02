@@ -94,6 +94,7 @@ class JobboleSpider(scrapy.Spider):
         item_loader.add_value('文章url', response.url)
         item_loader.add_value('文章url_md5', get_md5(response.url))
         item_loader.add_value('文章封面图url', [response.meta['文章封面图url']])
+        item_loader.add_css('文章内容', 'div.entry')
 
         文章实例 = item_loader.load_item()
         yield 文章实例
