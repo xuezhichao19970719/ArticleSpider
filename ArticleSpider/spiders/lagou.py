@@ -6,6 +6,7 @@ from scrapy.loader import ItemLoader
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from ..items import LagouJobItem
+from ..utils.common import get_md5
 
 
 class LagouSpider(CrawlSpider):
@@ -49,5 +50,6 @@ class LagouSpider(CrawlSpider):
         item_loader.add_css("工作地址", ".work_addr")
         item_loader.add_css("公司名称", "#job_company dt a img::attr(alt)")
         item_loader.add_css("公司网址", "#job_company dt a::attr(href)")
+        item_loader.add_css('招聘页面url', get_md5(response.url))
         job_item = item_loader.load_item()
         return job_item
